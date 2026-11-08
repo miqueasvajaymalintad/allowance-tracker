@@ -1,31 +1,39 @@
-// OWNER: Kenneth
 import View from './View.js';
 
-class SubjectListView extends View {
-  _parentElement = document.querySelector('.subject-list');
+class ExpenseListView extends View {
+  _parentElement = document.querySelector('.expense-list');
+  _errorMessage = 'No expenses yet. Add one above.';
 
-  addHandlerDelete(handler) {
-    this._parentElement.addEventListener('click', e => {
-      const btn = e.target.closest('.btn-delete');
+  // Controller subscribes here. One listener handles every Edit and Delete button.
+  addActionHandlers(editHandler, deleteHandler) {
+    this._parentElement.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
       if (!btn) return;
-      handler(Number(btn.dataset.id));
+
+      const { action, id } = btn.dataset;
+      if (action === 'edit') editHandler(id);
+      if (action === 'delete') deleteHandler(id);
     });
   }
 
-  // TODO (Kenneth): addHandlerEdit(handler) + edit buttons in the markup
-
   _generateMarkup() {
-    if (this._data.length === 0) return '<p>No subjects yet. Add one above.</p>';
-    return `<ul>${this._data.map(this._generateItem).join('')}</ul>`;
+    if (!this._data.length) return `<p class="empty">${this._errorMessage}</p>`;
+    return `<ul>${this._data.map((e) => this._generateMarkupItem(e)).join('')}</ul>`;
   }
 
-  _generateItem({ id, name, units, grade }) {
+  _generateMarkupItem(expense) {
     return `
-      <li>
-        <span>${name} - ${units} units - grade ${grade.toFixed(2)}</span>
-        <button class="btn-delete" data-id="${id}">Delete</button>
+      <li class="expense">
+        <div>
+          <strong>${this._escape(expense.description)}</strong>
+          <span>${this._escape(expense.category)} · ₱${expense.amount.toFixed(2)}</span>
+        </div>
+        <div>
+          <button type="button" data-action="edit" data-id="${expense.id}">Edit</button>
+          <button type="button" data-action="delete" data-id="${expense.id}">Delete</button>
+        </div>
       </li>`;
   }
 }
 
-export default new SubjectListView();
+export default new ExpenseListView();

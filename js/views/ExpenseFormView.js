@@ -29,3 +29,12 @@ class ExpenseFormView extends View {
     this._parentElement.elements.category.value = expense.category;
     this._button.textContent = 'Save changes';
     this.clearError();
+  }
+
+  reset() {
+    this._parentElement.reset();
+    this._button.textContent = 'Add expense';
+  }
+}
+
+export default new ExpenseFormView();
