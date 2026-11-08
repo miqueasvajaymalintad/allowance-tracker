@@ -31,13 +31,13 @@ export const loadState = () => {
 // ---------- validation (returns an error message, or null if OK) ----------
 export const validateExpense = ({ description, amount }) => {
   if (!description || !description.trim()) return 'Description is required.';
-  if (amount === '' || Number.isNaN(Number(amount)) || Number(amount) <= 0)
+  if (String(amount).trim() === '' || !Number.isFinite(Number(amount)) || Number(amount) <= 0)
     return 'Amount must be a number greater than 0.';
   return null;
 };
 
 export const validateAllowance = (value) => {
-  if (value === '' || Number.isNaN(Number(value)) || Number(value) < 0)
+  if (String(value).trim() === '' || !Number.isFinite(Number(value)) || Number(value) < 0)
     return 'Allowance must be a number, 0 or higher.';
   return null;
 };
