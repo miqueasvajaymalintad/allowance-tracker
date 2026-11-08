@@ -1,40 +1,83 @@
-// MODEL: holds all data. Never touches the DOM, never imports a view.
+// MODEL: holds all data and rules. Never touches the DOM, never imports a view.
+
+const STORAGE_KEY = 'allowance-tracker';
 
 export const state = {
-  subjects: [], // { id, name, units, grade }
+  allowance: 0,
+  expenses: [],
+  editingId: null,
 };
 
-const STORAGE_KEY = 'gwa-calculator-state';
-
-const saveState = function () {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.subjects));
+// ---------- localStorage ----------
+const persist = () => {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ allowance: state.allowance, expenses: state.expenses })
+  );
 };
 
-export const loadState = function () {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) state.subjects = JSON.parse(stored);
+export const loadState = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!stored) return;
+    state.allowance = Number(stored.allowance) || 0;
+    state.expenses = Array.isArray(stored.expenses) ? stored.expenses : [];
+  } catch {
+    state.allowance = 0;
+    state.expenses = [];
+  }
 };
 
-export const addSubject = function ({ name, units, grade }) {
-  state.subjects.push({ id: Date.now(), name, units, grade });
-  saveState();
+// ---------- validation (returns an error message, or null if OK) ----------
+export const validateExpense = ({ description, amount }) => {
+  if (!description || !description.trim()) return 'Description is required.';
+  if (amount === '' || Number.isNaN(Number(amount)) || Number(amount) <= 0)
+    return 'Amount must be a number greater than 0.';
+  return null;
 };
 
-export const deleteSubject = function (id) {
-  state.subjects = state.subjects.filter(subject => subject.id !== id);
-  saveState();
+export const validateAllowance = (value) => {
+  if (value === '' || Number.isNaN(Number(value)) || Number(value) < 0)
+    return 'Allowance must be a number, 0 or higher.';
+  return null;
 };
 
-// TODO (Kenneth): export const updateSubject = function (id, changes) { ... }
-
-export const getTotalUnits = function () {
-  return state.subjects.reduce((sum, { units }) => sum + units, 0);
+// ---------- allowance ----------
+export const setAllowance = (value) => {
+  state.allowance = Number(value);
+  persist();
 };
 
-// GWA = sum(grade * units) / sum(units)
-export const getGwa = function () {
-  const totalUnits = getTotalUnits();
-  if (totalUnits === 0) return 0;
-  const weighted = state.subjects.reduce((sum, { grade, units }) => sum + grade * units, 0);
-  return weighted / totalUnits;
+// ---------- expenses: add, edit, delete ----------
+const clean = ({ description, amount, category }) => ({
+  description: description.trim(),
+  amount: Number(amount),
+  category,
+});
+
+export const addExpense = (data) => {
+  state.expenses.push({ id: Date.now().toString(), ...clean(data) });
+  persist();
 };
+
+export const startEditing = (id) => {
+  const expense = state.expenses.find((e) => e.id === id);
+  state.editingId = expense ? id : null;
+  return expense;
+};
+
+export const updateExpense = (id, data) => {
+  const index = state.expenses.findIndex((e) => e.id === id);
+  if (index === -1) return;
+  state.expenses[index] = { id, ...clean(data) };
+  state.editingId = null;
+  persist();
+};
+
+export const deleteExpense = (id) => {
+  state.expenses = state.expenses.filter((e) => e.id !== id);
+  if (state.editingId === id) state.editingId = null;
+  persist();
+};
+
+// ----------
