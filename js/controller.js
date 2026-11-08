@@ -1,39 +1,54 @@
-// CONTROLLER: the only layer that talks to both model and views.
-// It never builds HTML itself.
+// CONTROLLER: connects the model and the views. Builds no HTML, touches no DOM.
 
 import * as model from './model.js';
-import subjectFormView from './views/subjectFormView.js';
-import subjectListView from './views/subjectListView.js';
-import gwaSummaryView from './views/gwaSummaryView.js';
+import expenseFormView from './views/ExpenseFormView.js';
+import expenseListView from './views/ExpenseListView.js';
+import balanceView from './views/BalanceView.js';
 
-const renderAll = function () {
-  subjectListView.render(model.state.subjects);
-  gwaSummaryView.render({ gwa: model.getGwa(), totalUnits: model.getTotalUnits() });
+// Re-render everything that depends on the state.
+const refresh = () => {
+  expenseListView.render(model.state.expenses);
+  balanceView.render(model.calculateBalance());
 };
 
-const controlAddSubject = function (data) {
-  // Validation lives here; the error is rendered through the view.
-  if (!data.name) return subjectFormView.renderError('Subject name is required.');
-  if (!Number.isInteger(data.units) || data.units <= 0)
-    return subjectFormView.renderError('Units must be a whole number above 0.');
-  if (data.grade < 1 || data.grade > 5)
-    return subjectFormView.renderError('Grade must be between 1.0 and 5.0.');
+const controlAllowance = (value) => {
+  const error = model.validateAllowance(value);
+  if (error) return balanceView.renderError(error);
 
-  model.addSubject(data);
-  subjectFormView.clearForm();
-  renderAll();
+  model.setAllowance(value);
+  refresh();
 };
 
-const controlDeleteSubject = function (id) {
-  model.deleteSubject(id);
-  renderAll();
+const controlSubmitExpense = (data) => {
+  const error = model.validateExpense(data);
+  if (error) return expenseFormView.renderError(error);
+
+  if (model.state.editingId) model.updateExpense(model.state.editingId, data);
+  else model.addExpense(data);
+
+  expenseFormView.clearError();
+  expenseFormView.reset();
+  refresh();
 };
 
-const init = function () {
+const controlEdit = (id) => {
+  const expense = model.startEditing(id);
+  if (expense) expenseFormView.fill(expense);
+};
+
+const controlDelete = (id) => {
+  const wasEditing = model.state.editingId === id;
+  model.deleteExpense(id);
+  if (wasEditing) expenseFormView.reset();
+  refresh();
+};
+
+const init = () => {
   model.loadState();
-  renderAll();
-  subjectFormView.addHandlerAdd(controlAddSubject);
-  subjectListView.addHandlerDelete(controlDeleteSubject);
+  refresh();
+  balanceView.addAllowanceHandler(controlAllowance);
+  expenseFormView.addSubmitHandler(controlSubmitExpense);
+  expenseListView.addActionHandlers(controlEdit, controlDelete);
 };
 
 init();
