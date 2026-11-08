@@ -1,31 +1,31 @@
-// OWNER: Aira
 import View from './View.js';
 
-class SubjectFormView extends View {
-  _parentElement = document.querySelector('.subject-form');
+class ExpenseFormView extends View {
+  _parentElement = document.querySelector('.expense-form');
   _errorElement = document.querySelector('.form-error');
+  _button = this._parentElement.querySelector('button');
 
-  // The controller subscribes to this; the view never calls the model.
-  addHandlerAdd(handler) {
-    this._parentElement.addEventListener('submit', e => {
+  // Controller subscribes here. The view only reports what the user typed.
+  addSubmitHandler(handler) {
+    this._parentElement.addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = this._parentElement.elements.name.value.trim();
-      const units = Number(this._parentElement.elements.units.value);
-      const grade = Number(this._parentElement.elements.grade.value);
-      handler({ name, units, grade });
+      handler(Object.fromEntries(new FormData(this._parentElement)));
     });
   }
 
+  // Override: the error goes in the error box, so the form is not erased.
   renderError(message) {
-    this._errorElement.textContent = message;
+    this._errorElement.innerHTML = `<p class="error">${this._escape(message)}</p>`;
   }
 
-  clearForm() {
-    this._parentElement.reset();
-    this.renderError('');
+  clearError() {
+    this._errorElement.innerHTML = '';
   }
 
-  // TODO (Aira): add more field-level feedback if you want.
-}
-
-export default new SubjectFormView();
+  // Fills the form when the user clicks Edit.
+  fill(expense) {
+    this._parentElement.elements.description.value = expense.description;
+    this._parentElement.elements.amount.value = expense.amount;
+    this._parentElement.elements.category.value = expense.category;
+    this._button.textContent = 'Save changes';
+    this.clearError();
