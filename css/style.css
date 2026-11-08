@@ -1,0 +1,11 @@
+body { font-family: system-ui, sans-serif; background: #f4f6f8; margin: 0; }
+.app { max-width: 640px; margin: 2rem auto; padding: 1rem; }
+.subject-form { display: flex; gap: .5rem; flex-wrap: wrap; }
+.subject-form input { flex: 1 1 120px; padding: .5rem; }
+.subject-form button { padding: .5rem 1rem; }
+.form-error { color: #c0392b; min-height: 1.2em; }
+.subject-list ul { list-style: none; padding: 0; }
+.subject-list li { display: flex; justify-content: space-between; align-items: center;
+  background: #fff; padding: .6rem .8rem; margin-bottom: .4rem; border-radius: 6px; }
+.gwa-summary { background: #fff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+.gwa-value { font-size: 2rem; font-weight: bold; }

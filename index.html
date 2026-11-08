@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GWA Calculator</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <main class="app">
+    <h1>GWA Calculator</h1>
+
+    <section class="gwa-summary"></section>
+
+    <section class="subject-form-section">
+      <form class="subject-form">
+        <input type="text" name="name" placeholder="Subject name" />
+        <input type="number" name="units" placeholder="Units" step="1" />
+        <input type="number" name="grade" placeholder="Grade (1.0 - 5.0)" step="0.25" />
+        <button type="submit">Add subject</button>
+      </form>
+      <p class="form-error"></p>
+    </section>
+
+    <section class="subject-list"></section>
+  </main>
+
+  <script type="module" src="./js/controller.js"></script>
+</body>
+</html>
