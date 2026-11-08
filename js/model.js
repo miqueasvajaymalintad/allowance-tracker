@@ -80,4 +80,12 @@ export const deleteExpense = (id) => {
   persist();
 };
 
-// ----------
+// ---------- derived value: recomputes on every change ----------
+export const calculateBalance = () => {
+  const totalSpent = state.expenses.reduce((sum, e) => sum + e.amount, 0);
+  return {
+    allowance: state.allowance,
+    totalSpent,
+    balance: state.allowance - totalSpent,
+  };
+};
